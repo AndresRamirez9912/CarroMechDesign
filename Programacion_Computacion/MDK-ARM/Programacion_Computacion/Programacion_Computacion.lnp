@@ -1,0 +1,25 @@
+--cpu Cortex-M3
+"programacion_computacion\startup_stm32f103xb.o"
+"programacion_computacion\main.o"
+"programacion_computacion\stm32f1xx_it.o"
+"programacion_computacion\stm32f1xx_hal_msp.o"
+"programacion_computacion\stm32f1xx_hal_gpio_ex.o"
+"programacion_computacion\stm32f1xx_hal_adc.o"
+"programacion_computacion\stm32f1xx_hal_adc_ex.o"
+"programacion_computacion\stm32f1xx_hal.o"
+"programacion_computacion\stm32f1xx_hal_rcc.o"
+"programacion_computacion\stm32f1xx_hal_rcc_ex.o"
+"programacion_computacion\stm32f1xx_hal_gpio.o"
+"programacion_computacion\stm32f1xx_hal_dma.o"
+"programacion_computacion\stm32f1xx_hal_cortex.o"
+"programacion_computacion\stm32f1xx_hal_pwr.o"
+"programacion_computacion\stm32f1xx_hal_flash.o"
+"programacion_computacion\stm32f1xx_hal_flash_ex.o"
+"programacion_computacion\stm32f1xx_hal_exti.o"
+"programacion_computacion\stm32f1xx_hal_tim.o"
+"programacion_computacion\stm32f1xx_hal_tim_ex.o"
+"programacion_computacion\system_stm32f1xx.o"
+--library_type=microlib --strict --scatter "Programacion_Computacion\Programacion_Computacion.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "Programacion_Computacion.map" -o Programacion_Computacion\Programacion_Computacion.axf
