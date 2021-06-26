@@ -27,4 +27,6 @@ programacion_computacion\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm
 programacion_computacion\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h
 programacion_computacion\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h
 programacion_computacion\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
+programacion_computacion\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
+programacion_computacion\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 programacion_computacion\stm32f1xx_it.o: ../Core/Inc/stm32f1xx_it.h

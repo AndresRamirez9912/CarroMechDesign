@@ -23,6 +23,14 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+// **************************** VARIABLES EXTERNAS ***************************
+extern uint32_t primera_medicion; // Variable en donde almacenare la primera medicion de tiempo 
+extern uint32_t segunda_medicion; // Variable en donde almacenare la segunda medicion de tiempo 
+extern float frecuencia; // Variable donde almacenare la frecuencia del pulso medido 
+extern uint8_t bandera_capturada; // Bandera que determina si se capturo la primera medicion de tiempo  
+// ***************************************************************************
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,6 +65,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
+extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -211,6 +220,35 @@ void DMA1_Channel1_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
 
   /* USER CODE END DMA1_Channel1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM2 global interrupt.
+  */
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+	// ************************ INTERRUPCIONES *************************************
+	if(bandera_capturada==0){ // Aun no se ha realizado la primera captura 
+		primera_medicion=HAL_TIM_ReadCapturedValue(&htim2,TIM_CHANNEL_1); // Realizo la lectura de la captura del timer 2 canal 1
+		bandera_capturada=1; // Como ya se realizo ya se hizo la primera captura entonces activo la bandera que habilita la segunda
+	}else{ // Ya se realizo la primera captura 
+		segunda_medicion=HAL_TIM_ReadCapturedValue(&htim2,TIM_CHANNEL_1); // Realizo la lectura de la captura del timer 2 canal 1
+		bandera_capturada=0; // Como se realizo la captura de la segunda medicion reinicio la bandera
+		if(segunda_medicion>primera_medicion){ // Calculo la frecuencia cuando la segunda medicion es mayor a la primera			
+			frecuencia=1000000/(segunda_medicion-primera_medicion);// Calculo la frecuencia (esta en us entonces la frecuencia de conteo para tener el valor real)						
+		}else if(segunda_medicion<primera_medicion){ // Si la segunda medicion es menor que la primera (es porque se reinicio el timer)
+			frecuencia=1000000/(segunda_medicion+(0xFFFF-primera_medicion)+1);// Calculo la frecuencia pero le tengo que restar al valor mayor el rango de conteo y sumar 1 
+		}
+		primera_medicion=0; // Reinicio la primera medicion 
+		segunda_medicion=0; // Reinicio la segunda medicion
+	}
+	// *****************************************************************************
+  /* USER CODE END TIM2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
