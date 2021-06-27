@@ -43,6 +43,8 @@
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
+I2C_HandleTypeDef hi2c1;
+
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
@@ -55,6 +57,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
 
 // ************************ VARIABLES GLOBALES *********************************
@@ -66,6 +69,14 @@ uint32_t primera_medicion=0; // Variable en donde almacenare la primera medicion
 uint32_t segunda_medicion=0; // Variable en donde almacenare la segunda medicion de tiempo 
 float frecuencia=0; // Variable donde almacenare la frecuencia del pulso medido 
 uint8_t bandera_capturada=0; // Bandera que determina si se capturo la primera medicion de tiempo 
+
+// Variables del I2C
+int8_t aceleracion[6]={0}; // Buffer que recibira las 6 aceleraciones 
+uint16_t gyroscopio[6]={0}; // Buffer que recibira los 6 gyroscopios 
+float aceleracion_X=0;
+float aceleracion_Y=0;
+float aceleracion_Z=0;
+short despertar=0;
 // *****************************************************************************
 
 /* USER CODE END PFP */
@@ -106,16 +117,20 @@ int main(void)
   MX_DMA_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 	
 // ************************ ADC ************************************************
-	HAL_ADC_Start_DMA(&hadc1,mediciones,3); // Inicializo el DMA colocando el vector en donde se almacenaran las mediciones y la cantidad de canales
+	 HAL_ADC_Start_DMA(&hadc1,mediciones,3); // Inicializo el DMA colocando el vector en donde se almacenaran las mediciones y la cantidad de canales
 // *****************************************************************************
 
 // ************************ TIMER IC *******************************************
 	 HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_1); // Activo el timer 2 en modo input capture con interrupcion
 // *****************************************************************************
 
+// ************************ I2C *******************************************
+	 HAL_I2C_Mem_Write(&hi2c1,(0x68<<1),0x6B,1,(uint8_t *)&despertar,1,HAL_MAX_DELAY); // Despierto el IMU (doy un lapso de 10ms para hacer el proceso)
+// *****************************************************************************
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -125,6 +140,19 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+		// ***********************************Lectura de los valores I2C******************************************************************
+		// Lectura de las aceleraciones
+		HAL_I2C_Mem_Read(&hi2c1,(0x68<<1 |0x01),0x3B,1,(uint8_t *)aceleracion,6,HAL_MAX_DELAY); // Leo las 6 aceleraciones
+		aceleracion_X=aceleracion[0]<<8 | aceleracion[1];
+		aceleracion_Y=aceleracion[2]<<8 | aceleracion[3];
+		aceleracion_Z=aceleracion[4]<<8 | aceleracion[5];
+		
+		// Calculo las aceleraciones en m/s^2
+		aceleracion_X=(((float)aceleracion_X*2.0)/32767.0)*9.80665; // Convierto la aceleracion a m/s^2
+		aceleracion_Y=(((float)aceleracion_Y*2.0)/32767.0)*9.80665; // Convierto la aceleracion a m/s^2
+		aceleracion_Z=(((float)aceleracion_Z*2.0)/32767.0)*9.80665; // Convierto la aceleracion a m/s^2
+		// *******************************************************************************************************************************
+		HAL_Delay(500);
   }
   /* USER CODE END 3 */
 }
@@ -208,7 +236,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -232,6 +260,40 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 400000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
 
 }
 
@@ -310,6 +372,7 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
 }
 

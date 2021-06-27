@@ -16,6 +16,7 @@
 "programacion_computacion\stm32f1xx_hal_flash.o"
 "programacion_computacion\stm32f1xx_hal_flash_ex.o"
 "programacion_computacion\stm32f1xx_hal_exti.o"
+"programacion_computacion\stm32f1xx_hal_i2c.o"
 "programacion_computacion\stm32f1xx_hal_tim.o"
 "programacion_computacion\stm32f1xx_hal_tim_ex.o"
 "programacion_computacion\system_stm32f1xx.o"
